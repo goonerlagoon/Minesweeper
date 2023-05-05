@@ -12,21 +12,27 @@ public class Grid {
 		numRows = 10;
 		numColumns = 10;
 		bombGrid = new boolean[10][10];
-		numBombs = 25;		
+		numBombs = 25;
+		createBombGrid();
+		createCountGrid();
 	}
 	
 	public Grid(int rows, int columns) {
 		numRows = rows;
 		numColumns = columns;
 		bombGrid = new boolean[rows][columns];
-		numBombs = 25;		
+		numBombs = 25;
+		createBombGrid();
+		createCountGrid();
 	}
 	
 	public Grid(int rows, int columns, int numBombs) {
 		numRows = rows;
 		numColumns = columns;
 		bombGrid = new boolean[rows][columns];
-		numBombs = numBombs;		
+		numBombs = numBombs;
+		createBombGrid();
+		createCountGrid();
 	}
 	
 	public int getNumRows() {
@@ -42,11 +48,27 @@ public class Grid {
 	}
 		
 	public boolean[][] getBombGrid() {
-		return bombGrid;
+		
+	    boolean[][] duplicate = new boolean[numRows][numColumns];
+	    for (int i = 0; i < numRows; i++) {
+	        for (int j = 0; j < numColumns; j++) {
+	            duplicate[i][j] = bombGrid[i][j];
+	        }
+	    }
+	  
+		return duplicate;
 	}
 	
 	public int[][] getCountGrid() {
-		return countGrid;
+		
+	    int[][] duplicate = new int[numRows][numColumns];
+	    for (int i = 0; i < numRows; i++) {
+	        for (int j = 0; j < numColumns; j++) {
+	            duplicate[i][j] = countGrid[i][j];
+	        }
+	    }
+	  
+		return duplicate;
 	}
 	
 	public boolean isBombAtLocation(int row, int column) {
@@ -106,29 +128,36 @@ public class Grid {
                 	count++;
                 }
                 
-                if (i > 0 && bombGrid[i - 1][j]) {
+                //bottom left
+                if (i < numRows && j > 0 && bombGrid[i + 1][j]) {
+                	count++;
+                }
+                
+                //directly below (top middle)                
+                if (i < numRows && bombGrid[i + 1][j]) {
+                	count++;
+                }
+                
+                //bottom right
+                if (i < numRows && j < numColumns && bombGrid[i + 1][j + 1]) {
+                	count++;
+                }
+                
+                //left
+                if (j > 0 && bombGrid[i][j - 1]) {
                 	count++;
                 }
 
-                if (i > 0 && mines[i - 1][j]) count++;
-                // Bottom Cell
-                if (i < 9 && mines[i + 1][j]) count++;
-                // Left Cell
-                if (j > 0 && mines[i][j - 1]) count++;
-                // Right Cell
-                if (j < 9 && mines[i][j + 1]) count++;
-                // Top Left Diagonal
-               
-                // Bottom Right Diagonal
-                if (i < 9 && j < 9 && mines[i + 1][j + 1]) count++;
-                // Top Right Diagonal
-                if (i > 0 && j < 9 && mines[i - 1][j + 1]) count++;
-                // Bottom Left Diagonal
-                if (i < 9 && j > 0 && mines[i + 1][j - 1]) count++;
-                // Store the count in the "surroundingMines" array
-                surroundingMines[i][j] = count;	
-		
-	
+                //right
+                if (j < numColumns && bombGrid[i][j + 1]) {
+                	count++;
+                }
+
+                countGrid[i][j] = count;	
+	        }
+	    }
+	}
+	    
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
