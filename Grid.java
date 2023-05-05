@@ -11,7 +11,6 @@ public class Grid {
 	public Grid() {
 		numRows = 10;
 		numColumns = 10;
-		bombGrid = new boolean[10][10];
 		numBombs = 25;
 		createBombGrid();
 		createCountGrid();
@@ -20,7 +19,6 @@ public class Grid {
 	public Grid(int rows, int columns) {
 		numRows = rows;
 		numColumns = columns;
-		bombGrid = new boolean[rows][columns];
 		numBombs = 25;
 		createBombGrid();
 		createCountGrid();
@@ -29,8 +27,7 @@ public class Grid {
 	public Grid(int rows, int columns, int numBombs) {
 		numRows = rows;
 		numColumns = columns;
-		bombGrid = new boolean[rows][columns];
-		numBombs = numBombs;
+		this.numBombs = numBombs;
 		createBombGrid();
 		createCountGrid();
 	}
@@ -72,95 +69,94 @@ public class Grid {
 	}
 	
 	public boolean isBombAtLocation(int row, int column) {
-		
+		return bombGrid[row][column];
 	}
 	
 	public int getCountAtLocation(int row, int column) {
-		
+		return countGrid[row][column];
 	}
 	
 	private void createBombGrid() {
-		int randomMines = 0;
-	
+		
+		bombGrid = new boolean[numRows][numColumns];	
 		
 		Random randomizer = new Random();
+		
 		int randRow;
 		int randCol;
 		
+		int randomMines = 0;
+				
 		while (randomMines < numBombs) {
 			
-			randRow = randomizer.nextInt(10);
-			randCol = randomizer.nextInt(10);
+			randRow = randomizer.nextInt(numRows);
+			randCol = randomizer.nextInt(numColumns);
 			
 			if (bombGrid[randRow][randCol] == false) {
 				bombGrid[randRow][randCol] = true;
+				randomMines++;
 			}
-			
-			randomMines++;
 		}
 	}
 	
 	private void createCountGrid() {
 		
+		countGrid = new int[numRows][numColumns];
+		
+		int bombCount;
+		
 	    for (int i = 0; i < numRows; i++) {
 	        for (int j = 0; j < numColumns; j++) {
        
-                int count = 0;
-                
+                bombCount = 0;
                 
                 //current cell
                 if (bombGrid[i][j]) { 
-                	count++;
+                	bombCount++;
                 }
                 
                 //top left
                 if (i > 0 && j > 0 && bombGrid[i - 1][j - 1]) {
-                	count++;
+                	bombCount++;
                 }
                 
                 //directly above (top middle)
                 if (i > 0 && bombGrid[i - 1][j]) {
-                	count++;
+                	bombCount++;
                 }
                 
                 //top right
-                if (i > 0 && j < numColumns && bombGrid[i - 1][j + 1]) {
-                	count++;
+                if (i > 0 && j < numColumns-1 && bombGrid[i - 1][j + 1]) {
+                	bombCount++;
                 }
                 
                 //bottom left
-                if (i < numRows && j > 0 && bombGrid[i + 1][j]) {
-                	count++;
+                if (i < numRows-1 && j > 0 && bombGrid[i + 1][j-1]) {
+                	bombCount++;
                 }
                 
                 //directly below (top middle)                
-                if (i < numRows && bombGrid[i + 1][j]) {
-                	count++;
+                if (i < numRows-1 && bombGrid[i + 1][j]) {
+                	bombCount++;
                 }
                 
                 //bottom right
-                if (i < numRows && j < numColumns && bombGrid[i + 1][j + 1]) {
-                	count++;
+                if (i < numRows-1 && j < numColumns-1 && bombGrid[i + 1][j + 1]) {
+                	bombCount++;
                 }
                 
                 //left
                 if (j > 0 && bombGrid[i][j - 1]) {
-                	count++;
+                	bombCount++;
                 }
 
                 //right
-                if (j < numColumns && bombGrid[i][j + 1]) {
-                	count++;
+                if (j < numColumns-1 && bombGrid[i][j + 1]) {
+                	bombCount++;
                 }
 
-                countGrid[i][j] = count;	
+                countGrid[i][j] = bombCount;	
 	        }
 	    }
 	}
-	    
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
 }
