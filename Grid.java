@@ -147,7 +147,7 @@ public class Grid {
                 	bombCount++;
                 }
                 
-                //directly below (top middle)                
+                //directly below (bottom middle)                
                 if (i < numRows-1 && bombGrid[i + 1][j]) {
                 	bombCount++;
                 }
@@ -209,23 +209,7 @@ public class Grid {
 			for (int i = 0; i < numRows; i++) {
 	            for (int j = 0; j < numColumns; j++) {
 	            	if (bombButtons[i][j] == btnClicked) {
-	            		if (isBombAtLocation(i, j)) {
-	            			btnClicked.setText("*");
-	            			btnClicked.setEnabled(false);
-	            			
-	            			revealedCells++;
-	            			
-	            			JOptionPane.showMessageDialog(this, "Sorry. You've lost.");
-	            			uncoverRemainingCells();
-	            			break;
-	            		}
-	            		
-	            		else if (isBombAtLocation(i, j) == false) {
-	            			int bombCountAtButton = getCountAtLocation(i, j);
-	            			btnClicked.setText(String.valueOf(bombCountAtButton));
-	            			btnClicked.setEnabled(false);
-	            			revealedCells++;
-	            		}
+	            		uncoverCell(i, j, btnClicked);
 	            	}
 	            }
 			}
@@ -236,6 +220,33 @@ public class Grid {
 				JOptionPane.showMessageDialog(this, "Good job. You won");
 				uncoverRemainingCells();
 			}
+		}
+		
+		public void uncoverCell(int i, int j, JButton btnClicked) {
+			if (isBombAtLocation(i, j)) {
+    			btnClicked.setText("*");
+    			btnClicked.setEnabled(false);
+    			
+    			revealedCells++;
+    			
+    			JOptionPane.showMessageDialog(this, "Sorry. You've lost.");
+    			uncoverRemainingCells();
+    		}
+    		
+    		else if (!isBombAtLocation(i, j)) {
+    			int bombCountAtButton = getCountAtLocation(i, j);
+    			
+    			// check for cells without any bombs as neighbours
+    			//if (bombCountAtButton == 0) {
+    			//	uncoverSurroundingCells(i, j);
+    			//}
+    			
+    			
+    			
+    			btnClicked.setText(String.valueOf(bombCountAtButton));
+    			btnClicked.setEnabled(false);
+    			revealedCells++;
+    		}
 		}
 		
 		public void uncoverRemainingCells() {
@@ -255,6 +266,31 @@ public class Grid {
 	            	}
 	            }
 			}
+			
+			
+		}
+		
+		private void uncoverSurroundingCells(int i, int j) {
+			
+			//top left
+			if (i > 0 && j > 0 && buttons[i - 1][j - 1].isEnabled() && ) uncoverCell(i - 1, j - 1);
+			
+			
+		    if (i > 0 && buttons[i - 1][j].isEnabled()) uncoverCell(i - 1, j);
+		    // check if the cell below is within bounds and enabled, and if so, uncover it
+		    if (i < 9 && buttons[i + 1][j].isEnabled()) uncoverCell(i + 1, j);
+		    // check if the cell to the left is within bounds and enabled, and if so, uncover it
+		    if (j > 0 && buttons[i][j - 1].isEnabled()) uncoverCell(i, j - 1);
+		    // check if the cell to the right is within bounds and enabled, and if so, uncover it
+		    if (j < 9 && buttons[i][j + 1].isEnabled()) uncoverCell(i, j + 1);
+		    // check if the top-left cell is within bounds and enabled, and if so, uncover it
+		    
+		    // check if the bottom-right cell is within bounds and enabled, and if so, uncover it
+		    if (i < 9 && j < 9 && buttons[i + 1][j + 1].isEnabled()) uncoverCell(i + 1, j + 1);
+		    // check if the top-right cell is within bounds and enabled, and if so, uncover it
+		    if (i > 0 && j < 9 && buttons[i - 1][j + 1].isEnabled()) uncoverCell(i - 1, j + 1);
+		    // check if the bottom-left cell is within bounds and enabled, and if so, uncover it
+		    if (i < 9 && j > 0 && buttons[i + 1][j - 1].isEnabled()) uncoverCell(i + 1, j - 1);
 		}
 	}
 	
