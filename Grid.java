@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JButton;
-import javax.swing.JPanel;
+
 
 public class Grid {
 	
@@ -176,6 +176,7 @@ public class Grid {
 		
 		private JButton[][] bombButtons;
 		private int revealedCells;
+		private final int TOTAL_CELLS = getNumColumns() * getNumRows();
 		
 		public GridFrame() {			
 			
@@ -206,47 +207,143 @@ public class Grid {
 			
 			JButton btnClicked = (JButton) e.getSource();
 			
+			int btnRow = 0;
+			int btnCol = 0;
+			
 			for (int i = 0; i < numRows; i++) {
 	            for (int j = 0; j < numColumns; j++) {
 	            	if (bombButtons[i][j] == btnClicked) {
 	            		uncoverCell(i, j, btnClicked);
+	            		btnRow = i;
+	            		btnCol = j;
 	            	}
 	            }
 			}
 			
-			
-			int TOTAL_CELLS = getNumColumns() * getNumRows();
-			if (revealedCells ==  TOTAL_CELLS - getNumBombs()) {
-				JOptionPane.showMessageDialog(this, "Good job. You won");
-				uncoverRemainingCells();
+			if (getCountAtLocation(btnRow, btnCol) == 0) {
+				uncoverSurroundingCells(btnRow, btnCol);
 			}
 		}
 		
+		
 		public void uncoverCell(int i, int j, JButton btnClicked) {
-			if (isBombAtLocation(i, j)) {
-    			btnClicked.setText("*");
-    			btnClicked.setEnabled(false);
-    			
-    			revealedCells++;
-    			
-    			JOptionPane.showMessageDialog(this, "Sorry. You've lost.");
-    			uncoverRemainingCells();
-    		}
-    		
-    		else if (!isBombAtLocation(i, j)) {
-    			int bombCountAtButton = getCountAtLocation(i, j);
-    			
-    			// check for cells without any bombs as neighbours
-    			//if (bombCountAtButton == 0) {
-    			//	uncoverSurroundingCells(i, j);
-    			//}
-    			
-    			
-    			
-    			btnClicked.setText(String.valueOf(bombCountAtButton));
-    			btnClicked.setEnabled(false);
-    			revealedCells++;
-    		}
+			if (btnClicked.isEnabled()) {
+				if (isBombAtLocation(i, j)) {
+	    			btnClicked.setText("*");
+	    			btnClicked.setEnabled(false);
+	    			
+	    			revealedCells++;
+	    		}
+	    		
+	    		else {
+	    			int bombCountAtButton = getCountAtLocation(i, j);
+	    			
+	    			btnClicked.setText(String.valueOf(bombCountAtButton));
+	    			btnClicked.setEnabled(false);
+	    			revealedCells++;
+	    		}
+				
+				if (isGameWon()) {
+					gameOver('W');
+				}
+				
+				else if (isGameLost(btnClicked)) {
+					gameOver('L');
+				}
+				
+				else return;
+			}	
+		}
+		
+		private void uncoverSurroundingCells(int i, int j) {
+			
+			//top left
+			if (i > 0 && j > 0 && bombButtons[i - 1][j - 1].isEnabled()) {
+				if (getCountAtLocation(i-1, j-1) == 0) {
+					uncoverCell(i - 1, j - 1, bombButtons[i - 1][j - 1]);
+					uncoverSurroundingCells(i-1, j-1);
+					
+				}
+				
+				else uncoverCell(i - 1, j - 1, bombButtons[i - 1][j - 1]);			
+			}
+			
+			//top middle (directly above)
+		    if (i > 0 && bombButtons[i - 1][j].isEnabled()) {
+		    	if (getCountAtLocation(i-1, j) == 0) {
+		    		uncoverCell(i - 1, j, bombButtons[i - 1][j]);
+					uncoverSurroundingCells(i-1, j);
+					
+				}
+		    	
+		    	else uncoverCell(i - 1, j, bombButtons[i - 1][j]);
+		    }
+		    
+		    //top right
+		    if (i > 0 && j < numColumns - 1 && bombButtons[i - 1][j + 1].isEnabled()) {
+		    	if (getCountAtLocation(i-1, j+1) == 0) {
+		    		uncoverCell(i - 1, j + 1, bombButtons[i - 1][j + 1]);
+		    		uncoverSurroundingCells(i-1, j+1);
+		    		
+		    	}
+		    	
+		    	else uncoverCell(i - 1, j + 1, bombButtons[i - 1][j + 1]);
+		    }
+		    
+		    //left
+		    if (j > 0 && bombButtons[i][j - 1].isEnabled()) {
+		    	if (getCountAtLocation(i, j-1) == 0) {
+		    		uncoverCell(i, j - 1, bombButtons[i][j - 1]);
+		    		uncoverSurroundingCells(i, j-1);
+		    		
+		    	}
+		    	
+		    	else uncoverCell(i, j - 1, bombButtons[i][j - 1]);
+		    }
+		    
+		    //right
+		    if (j < numColumns-1 && bombButtons[i][j + 1].isEnabled()) {
+		    	if (getCountAtLocation(i, j + 1) == 0) {
+		    		uncoverCell(i, j + 1, bombButtons[i][j + 1]);
+		    		uncoverSurroundingCells(i, j + 1);
+		    		
+		    	}
+		    	
+		    	else uncoverCell(i, j + 1, bombButtons[i][j + 1]);
+		    }
+		    
+		    // check if the bottom-left cell is within bounds and enabled, and if so, uncover it
+		    if (i < numRows-1 && j > 0 && bombButtons[i + 1][j - 1].isEnabled()) {
+		    	if (getCountAtLocation(i + 1, j - 1) == 0) {
+		    		uncoverCell(i + 1, j - 1, bombButtons[i + 1][j - 1]);
+		    		uncoverSurroundingCells(i + 1, j - 1);
+		    		
+		    	}
+		    	
+		    	else uncoverCell(i + 1, j - 1, bombButtons[i + 1][j - 1]);
+		    }
+		    
+		    //bottom middle (directly below)
+		    if (i < numRows-1 && bombButtons[i + 1][j].isEnabled()) {
+		    	if (getCountAtLocation(i + 1, j) == 0) {
+		    		uncoverCell(i + 1, j, bombButtons[i + 1][j]);
+		    		uncoverSurroundingCells(i + 1, j);
+		    		
+		    	}
+		    	
+		    	else uncoverCell(i + 1, j, bombButtons[i + 1][j]);
+		    }
+
+		    // check if the bottom-right cell is within bounds and enabled, and if so, uncover it
+		    if (i < numRows-1 && j < numColumns-1 && bombButtons[i + 1][j + 1].isEnabled()) {
+		    	if (getCountAtLocation(i + 1, j + 1) == 0) {
+		    		uncoverCell(i + 1, j + 1, bombButtons[i + 1][j + 1]);
+		    		uncoverSurroundingCells(i + 1, j + 1);
+		    		
+		    	}
+		    	
+		    	else uncoverCell(i + 1, j + 1, bombButtons[i + 1][j + 1]);
+		    }
 		}
 		
 		public void uncoverRemainingCells() {
@@ -266,37 +363,66 @@ public class Grid {
 	            	}
 	            }
 			}
-			
-			
 		}
 		
-		private void uncoverSurroundingCells(int i, int j) {
+		public boolean isGameWon() {
 			
-			//top left
-			if (i > 0 && j > 0 && buttons[i - 1][j - 1].isEnabled() && ) uncoverCell(i - 1, j - 1);
+			if (revealedCells ==  TOTAL_CELLS - getNumBombs()) {
+				return true;
+			}
 			
-			
-		    if (i > 0 && buttons[i - 1][j].isEnabled()) uncoverCell(i - 1, j);
-		    // check if the cell below is within bounds and enabled, and if so, uncover it
-		    if (i < 9 && buttons[i + 1][j].isEnabled()) uncoverCell(i + 1, j);
-		    // check if the cell to the left is within bounds and enabled, and if so, uncover it
-		    if (j > 0 && buttons[i][j - 1].isEnabled()) uncoverCell(i, j - 1);
-		    // check if the cell to the right is within bounds and enabled, and if so, uncover it
-		    if (j < 9 && buttons[i][j + 1].isEnabled()) uncoverCell(i, j + 1);
-		    // check if the top-left cell is within bounds and enabled, and if so, uncover it
-		    
-		    // check if the bottom-right cell is within bounds and enabled, and if so, uncover it
-		    if (i < 9 && j < 9 && buttons[i + 1][j + 1].isEnabled()) uncoverCell(i + 1, j + 1);
-		    // check if the top-right cell is within bounds and enabled, and if so, uncover it
-		    if (i > 0 && j < 9 && buttons[i - 1][j + 1].isEnabled()) uncoverCell(i - 1, j + 1);
-		    // check if the bottom-left cell is within bounds and enabled, and if so, uncover it
-		    if (i < 9 && j > 0 && buttons[i + 1][j - 1].isEnabled()) uncoverCell(i + 1, j - 1);
+			else return false;	
 		}
+		
+		public boolean isGameLost(JButton btn) {
+			
+			if (btn.getText() ==  "*") {
+				return true;
+			}
+			
+			else return false;	
+		}
+		
+		public void gameOver(char winOrLose) {
+			
+			if (winOrLose == 'w') {
+				JOptionPane.showMessageDialog(this, "Good job. You won");
+				uncoverRemainingCells();
+				
+			}
+			
+			else {
+    			JOptionPane.showMessageDialog(this, "Sorry. You've lost.");
+    			uncoverRemainingCells();
+			}
+			
+			int result = JOptionPane.showConfirmDialog(this, "Do you want to play again?", "New Game", JOptionPane.YES_NO_OPTION);
+			
+			if (result == JOptionPane.YES_OPTION) {
+			    reset();
+			}
+		
+			else dispose();
+		}
+		
+		public void reset() {
+			for (int i = 0; i < numRows; i++) {
+	            for (int j = 0; j < numColumns; j++) {
+	            	bombButtons[i][j].setEnabled(true);
+	                bombButtons[i][j].setText("");
+	            }
+	        }
+			
+			createBombGrid();
+			createCountGrid();
+		}
+		
+		
 	}
 	
 	public static void main(String[] args) {
 		
-		Grid minesweeper = new Grid(5, 2, 2);
+		Grid gametime = new Grid(4, 4, 4);
 		
 	}
 }
