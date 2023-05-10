@@ -220,9 +220,31 @@ public class Grid {
 	            }
 			}
 			
-			if (getCountAtLocation(btnRow, btnCol) == 0) {
+			if (isGameWon()) {
+				gameOver('W');
+				return;
+			}
+			
+			else if (isGameLost(btnClicked)) {
+				gameOver('L');
+				return;
+			}
+			
+			else if (getCountAtLocation(btnRow, btnCol) == 0) {
 				uncoverSurroundingCells(btnRow, btnCol);
 			}
+			
+			if (isGameWon()) {
+				gameOver('W');
+				return;
+			}
+			
+			else if (isGameLost(btnClicked)) {
+				gameOver('L');
+				return;
+			}
+			
+			
 		}
 		
 		
@@ -231,7 +253,6 @@ public class Grid {
 				if (isBombAtLocation(i, j)) {
 	    			btnClicked.setText("*");
 	    			btnClicked.setEnabled(false);
-	    			gameOver('L');
 	    			return;
 	    			
 	    		}
@@ -243,16 +264,6 @@ public class Grid {
 	    			btnClicked.setEnabled(false);
 	    			revealedCells++;
 	    		}
-				
-				if (isGameWon()) {
-					gameOver('W');
-				}
-				
-				else if (isGameLost(btnClicked)) {
-					gameOver('L');
-				}
-				
-				else return;
 			}	
 		}
 		
@@ -428,7 +439,7 @@ public class Grid {
 	
 	public static void main(String[] args) {
 		
-		Grid gametime = new Grid(4, 4, 2);
+		Grid gametime = new Grid(10, 10, 25);
 		
 	}
 }
