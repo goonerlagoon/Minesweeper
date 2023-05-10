@@ -94,8 +94,8 @@ public class Grid {
 		
 		Random randomizer = new Random();
 		
-		int randRow;
-		int randCol;
+		int randRow = 0;
+		int randCol = 0;
 		
 		int randomMines = 0;
 				
@@ -175,7 +175,7 @@ public class Grid {
 	private class GridFrame extends JFrame implements ActionListener {
 		
 		private JButton[][] bombButtons;
-		private int revealedCells;
+		private int revealedCells = 0;
 		private final int TOTAL_CELLS = getNumColumns() * getNumRows();
 		
 		public GridFrame() {			
@@ -231,8 +231,9 @@ public class Grid {
 				if (isBombAtLocation(i, j)) {
 	    			btnClicked.setText("*");
 	    			btnClicked.setEnabled(false);
+	    			gameOver('L');
+	    			return;
 	    			
-	    			revealedCells++;
 	    		}
 	    		
 	    		else {
@@ -385,7 +386,7 @@ public class Grid {
 		
 		public void gameOver(char winOrLose) {
 			
-			if (winOrLose == 'w') {
+			if (winOrLose == 'W') {
 				JOptionPane.showMessageDialog(this, "Good job. You won");
 				uncoverRemainingCells();
 				
@@ -401,20 +402,25 @@ public class Grid {
 			if (result == JOptionPane.YES_OPTION) {
 			    reset();
 			}
-		
+			
 			else dispose();
 		}
+		
 		
 		public void reset() {
 			for (int i = 0; i < numRows; i++) {
 	            for (int j = 0; j < numColumns; j++) {
+	            	
+	            	bombGrid[i][j] = false;
+	            	bombButtons[i][j].setText("");
 	            	bombButtons[i][j].setEnabled(true);
-	                bombButtons[i][j].setText("");
+	              
 	            }
 	        }
 			
 			createBombGrid();
 			createCountGrid();
+			revealedCells = 0;
 		}
 		
 		
@@ -422,7 +428,7 @@ public class Grid {
 	
 	public static void main(String[] args) {
 		
-		Grid gametime = new Grid(4, 4, 4);
+		Grid gametime = new Grid(4, 4, 2);
 		
 	}
 }
